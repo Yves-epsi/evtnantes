@@ -3,45 +3,91 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>commits-example</title>
-    <link rel="stylesheet" href="/css/master.css">
+    <title>Evenements Nantes</title>
+    <style>
+      #demo {
+        font-family: "Helvetica", Arial, sans-serif;
+      }
+      a {
+        text-decoration: none;
+        color: #f66;
+      }
+      li {
+        line-height: 1.5em;
+        margin-bottom: 20px;
+      }
+      .author,
+      .date {
+        font-weight: bold;
+      }
+    </style>
   </head>
   <body>
     <div id="demo">
-      <h1>Latest Vue.js Commits</h1>
-      <template v-for="branch in branches">
-        <!-- pour chaucne des branches-->
-        <input
-          type="radio"
-          :id="branch"
-          :value="branch"
-          name="branch"
-          v-model="currentBranch"
-        />
+      <h1>Evenements Nantes</h1>
+      <div>
+          <ul>
+            <li v-for="a in array">
+            <p>{{ a }}</p></li>
+          </ul>
+      </div>
         <!-- veut dire que la var id et branch peut changer -->
-        <label :for="branch">{{ branch }}</label>
-      </template>
-      <p>vuejs/vue@{{ currentBranch }}</p>
-      <ul>
-        <li v-for="record in commits">
-          <a :href="record.html_url" target="_blank" class="commit">{{
-            record.sha.slice(0, 7)
-          }}</a>
-          - <span class="message">{{ record.commit.message | truncate }}</span
-          ><br />
-          by
-          <span class="author"
-            ><a :href="record.author.html_url" target="_blank">{{
-              record.commit.author.name
-            }}</a></span
-          >
-          at
-          <span class="date">{{ record.commit.author.date | formatDate }}</span>
-        </li>
-      </ul>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script src="js/main.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+      var apiURL =
+        "https://data.nantesmetropole.fr/api/records/1.0/search/?dataset=244400404_agenda-evenements-nantes-nantes-metropole&facet=emetteur&facet=rubrique&facet=lieu&facet=ville";
+
+      /**
+       * Actual demo
+       */
+      var demo = new Vue({
+        el: "#demo",
+        data:{
+                array:null
+        },
+
+        created: function() {
+          //au moment de la création
+          //il aurait été possible de mettre mounted mais created le lance plutôt
+          //lors de la création lancement de la méthode
+          this.fetchData();
+        },
+
+        /*watch: {
+          //permet de surveiller la valeur de currentBranch en temps réeel, si elle change, la fct fetchData est lancé.
+          currentBranch: "fetchData"
+        },
+
+        filters: {
+          truncate: function(v) {
+            var newline = v.indexOf("\n");
+            return newline > 0 ? v.slice(0, newline) : v;
+          },
+          formatDate: function(v) {
+            return v.replace(/T|Z/g, " ");
+          }
+        },*/
+
+        methods: {
+          fetchData: function() {
+
+            var self = this
+            //authentification et accès à apiURL du prof
+            axios
+              .get(apiURL)
+              .then(function(response) {
+                self.array = response.data['records'];
+                console.log(this.array)
+                //console.log(self.commits[0].html_url);
+              })
+              .catch(function(error) {
+                console.log(error);
+              });
+          }
+        }
+      });
+    </script>
   </body>
 </html>
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
